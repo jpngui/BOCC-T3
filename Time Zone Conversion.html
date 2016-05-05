@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <!-- (c)2016 Written by Jonathan Ngui (jngui) aka J-Thugga -->
-<!-- with consultation by Brandon Porter (braporte) -->
+<!-- with consultation by Brandon Porter (braporte) aka B-Thug -->
 
 <!--
 To do:
-	- Copied/Failed message when copying Atlantic time
-	- Break out "What time is it in" into separate section - left/right or above/below
-	- Third section to get telephone country codes - given country or country code number
-		- per Wikipedia, local DB should be do-able; if not found, open Google tab
 	- Select/Focus on main input box on tab/window focus
+	- Make Time Conversion be more flexible/accepting with Entered Date
+	- tweak min-width for flex layout swapping sections ~1260px
 -->
 
 <html lang="en-US">
@@ -29,7 +27,6 @@ html, body {
 
 body {
 	width: 100%;
-	overflow: hidden;
 	background-size: cover;
 	background-attachment: fixed;
 	background-position: center bottom;
@@ -39,7 +36,7 @@ body {
 }
 
 header { /* from cisco.com */
-	display:  block;
+	display: block;
 	min-height: 75px;
 	height: 70px;
 	padding: 0px;
@@ -91,7 +88,7 @@ h1 { /* header title */
 	color: #FFFFFF;
 	/*flex: 1;*/
 	display: flex;
-	flex-direction: row;
+	//flex-direction: row;
 	flex-wrap: wrap;
 }
 
@@ -111,7 +108,7 @@ h4.version {
 	line-height: 140%;
 }
 
-.newTimeBG, .newTimeBGStart, .newTimeBGOut, .whatTime, .telCode {
+.newTimeBGStart, .newTimeBG, .newTimeBGOut, .whatTime, .telCode {
     /*background: #FEFFDE;*/
 	/*background: #D2E6F7;*/
 	background-color: rgba(210,230,247,0.75); /*#D2E6F7*/
@@ -123,16 +120,11 @@ h4.version {
 	padding: 10px;
 }
 
-.newTimeBG {
+.newTimeBG { /* currently unused */
 	animation: growIn 0.25s ease-in-out both, fadeInBG 0.25s ease-in-out both;
 }
 
-.telCode {
-	/*temporary until function is implemented*/
-	opacity: 0.3;
-}
-
-.newTimeBGOut {
+.newTimeBGOut { /* currently unused */
 	animation: shrinkOut 0.25s ease-in-out both, fadeOutBG 0.25s ease-in-out both;
 }
 
@@ -228,37 +220,39 @@ h4.version {
 	}
 }
 
-.copyMessageSuccessHide, .copyMessageSuccessShow, .copyMessageFailedHide, .copyMessageFailedShow  {
+.copyMessageSuccessStart, .copyMessageFailedStart, .copyMessageSuccessHide, .copyMessageSuccessShow, .copyMessageFailedHide, .copyMessageFailedShow {
+	opacity: 0;
 	font-size: 10pt;
 	position: relative;
-	/*top: 6px;*/
-	/*right: 8px;*/
+	top: -1.8em;
+	left: 5.3em;
 	color: #FFFFFF;
 	width: 40px;
 }
 
 .copyMessageSuccessHide {
 	background: #20851B;
-	opacity: 0;
+	animation: fadeOut 0.15s ease-in-out both;
 }
 
 .copyMessageSuccessShow {
 	background: #20851B;
-	opacity: 1;
+	animation: fadeIn 0.15s ease-in-out both;
 }
 
 .copyMessageFailedHide {
 	background: #C70606;
-	opacity: 0;
+	animation: fadeOut 0.15s ease-in-out both;
 }
 
 .copyMessageFailedShow {
 	background: #C70606;
-	opacity: 1;
+	animation: fadeIn 0.15s ease-in-out both;
 }
 
 #whatTimeInput {
 	box-shadow: 4px 4px 3px #888888;
+	text-align: center;
 }
 
 #timeInPast {
@@ -271,33 +265,65 @@ h4.version {
 	text-shadow: 1px 1px 3px #5FA617;
 }
 
-a.whatTimeClass {
+.giveCountryAnswerStart {
+	opacity: 0;
+}
+
+.giveCountryAnswerFadeIn {
+	animation: fadeIn 0.15s ease-in-out both;
+}
+
+.giveCountryAnswerFadeOut {
+	animation: fadeOutn 0.15s ease-in-out both;
+}
+
+.giveTelCodeAnswerStart {
+	opacity: 0;
+}
+
+.giveTelCodeAnswerFadeIn {
+	animation: fadeIn 0.15s ease-in-out both;
+}
+
+.giveTelCodeAnswerFadeOut {
+	animation: fadeOutn 0.15s ease-in-out both;
+}
+
+a {
 	color: blue;
 	text-decoration: underline;
 }
 
-a.whatTimeClass:link {
+a:link {
 	color: blue;
 	text-decoration: underline;
 	cursor: pointer;
 }
 
-a.whatTimeClass:visited {
+a:visited {
 	color: blue;
 	text-decoration: underline;
 	cursor: pointer;
 }
 
-a.whatTimeClass:hover {
+a:hover {
 	color: blue;
 	text-decoration: underline;
 	cursor: pointer;
 }
 
-a.whatTimeClass:active {
+a:active {
 	color: red;
 	text-decoration: underline;
 	cursor: grabbing;
+}
+
+select, option {
+	background-color: rgba(255,255,255,0.3);
+}
+
+input {
+	background-color: rgba(255,255,255,0.3);
 }
 
 footer {
@@ -308,7 +334,7 @@ footer {
 	border: 2px solid white;
 	font-family: PT Sans Narrow;
 	font-size: 9pt;
-	display: inline-flex;
+	//display: inline-flex;
 	border-radius: 25px;
 	padding: 14px;
 	margin: auto;
@@ -327,7 +353,7 @@ footer:hover {
 
 .disclaimer {
 	text-align: left;
-	margin-left: 40px;
+	margin-left: 35px;
 	/*font-weight: bold;*/
 }
 
@@ -387,14 +413,85 @@ input[type=number] {
 	font-weight: bold;
 	padding-left: 3px;
 }
+
+/*
+	1. 0-839	 single column
+	2. 840-1259	 two and one
+	3. 1260+	 three across
+*/
+
+@media only screen and (min-width: 0px) {
+	/*single column*/
+	.newTimeBGStart {
+		order: 1;
+	}
+	.whatTime {
+		order: 2;
+	}
+	.telCode {
+		order: 3;
+	}
+	h1 {
+		font-size: 1.5em;
+	}
+	#ciscologo {
+		height: 25px;
+		width: 50px;
+	}
+	.currentTime {
+		font-size: 12pt;
+	}
+}
+
+@media only screen and (min-width: 600px) {
+	h1 {
+		font-size: 2em;
+	}
+	#ciscologo {
+		height: 50px;
+		width: 100px;
+	}
+	.currentTime {
+		font-size: 16pt;
+	}
+}
+
+@media only screen and (min-width: 840px) {
+	/*two and one*/
+	.newTimeBGStart {
+		order: 1;
+	}
+	.whatTime {
+		order: 2;
+	}
+	.telCode {
+		order: 3;
+	}
+	h1 {
+		font-size: 2em;
+	}
+}
+
+@media only screen and (min-width: 1260px) {
+	/*normal - three across*/
+	.newTimeBGStart {
+		order: 2;
+	}
+	.whatTime {
+		order: 1;
+	}
+	.telCode {
+		order: 3;
+	}
+}
 </style>
 
-<body onLoad="document.getElementById('foreignTime').focus(); getCurrentTimePlaceholder();">
+<body onLoad="document.getElementById('foreignTime').focus(); getCurrentTimePlaceholder(); initiateCountryDropdown();">
 
 <div class="wrapper">
 	<header>
 		<!-- h1>J-Thugga's Time Conversion to Atlantic Time (GMT <span id="halifaxTimeZone" name="halifaxTimeZone"></span>) -->
-		<h1> J-Thugga's Time and Telephone Tools (T&sup3;)
+		<h1> BOCC::Cisco Time and Telephone Tools (T&sup3;)
 		<a href="http://www.cisco.com" target="_new">
 			<img id="ciscologo" height="50px" src="data:image/png;base64,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">
 		</a>
@@ -410,7 +507,7 @@ input[type=number] {
 
 		<div id="newTimeBG" class="newTimeBGStart">
 			<span class="toolTitle">Time Conversion</span><br><br>
-			<input type="text" class="newTimeTextBox" id="foreignTime" size="25" maxlength="30" value="" placeholder="Ex: 04-APR-2016 23:53 (GMT -4)" onkeydown="if (event.keyCode == 13) document.getElementById('convertTime').click();" required>
+			<input type="text" class="newTimeTextBox" id="foreignTime" size="27" maxlength="30" value="" placeholder="Ex: 04-APR-2016 23:53 (GMT -4)" onkeydown="if (event.keyCode == 13) document.getElementById('convertTime').click();" required>
 			&nbsp;&nbsp;
 			<button class="newTimeTextBox" id="convertTime" onClick="validate()">Convert Time</button><br><br>
 		
@@ -421,40 +518,32 @@ input[type=number] {
 			<span class="toolTitle">What Time?</span><br><br>
 			<a id="whatTimeID" class="whatTimeClass" onClick="whatTime();" style="a.whatTimeClass:link color: #13F3DE;">What time is it in</a>
 			<br><br>
-			<input type="text" id="whatTimeInput" class="newTimeTextBox" size="35" title="Please enter a country." onkeydown="if (event.keyCode == 13) document.getElementById('whatTimeID').click();" placeholder="City/State/Country"></input>&nbsp;&nbsp;&nbsp;?
+			<input type="text" id="whatTimeInput" class="newTimeTextBox" size="35" maxlength="30" title="Enter a location." onkeydown="if (event.keyCode == 13) document.getElementById('whatTimeID').click();" placeholder="City/State/Country"></input>&nbsp;&nbsp;&nbsp;?
+			<p style="font-size: 0.85em; color: #404040;">Opens Google search in a new tab/window.</p>
 		</div>
 		
 		<div id="telCode" class="telCode">
 			<span class="toolTitle">Telephone Country Codes</span><br><br>
-			What country has code +<input type="tel" size="4" maxlength="5" pattern="[0-9]{1,5}" title="1 to 5 numerals" onkeypress="return isNumberKey(event)"></input> ?<br>
-			<span>Answer</span>
+			<a onClick="getCountryGivenCode();">What country has code +</a><input type="tel" id="userTelCountryCode" size="6" maxlength="7" pattern="[0-9]{1,7}" title="Enter 1 to 7 digits." onkeypress="if (event.keyCode == 13) getCountryGivenCode(); else return isNumberKey(event)"></input> ?<br>
+			<span id="giveCountryAnswer" class="giveCountryAnswerStart"></span>
 			<br><br>
 			What is the country code for 
 			<!-- JS to populate options with JSON information -->
-			<select>
-					<option>Country 01</option>
-					<option>Country 02</option>
-					<option>Country 03</option>
-					<option>Country 04</option>
-					<option>Country 05</option>
-					<option>Country 06</option>
-					<option>Country 07</option>
-					<option>Country 08</option>
-					<option>Country 09</option>
+			<select id="countryDropdown" title="Select a country." onchange="getTelephoneCountryCode(this.value);">
 			</select> ?<br>
-			<span>Answer</span>
+			<span id="giveTelCodeAnswer" class="giveTelCodeAnswerStart"></span>
 		</div>
 		
 	</section>
 	
 	<footer>
 		<article class="disclaimer">
-			<span>Version 0.9.6b</span><br>
+			<span>Version 0.9.9b201604301906</span><br>
 			<span>Assuming SORT/PEGA has already validated the date<br>
 			<span class="footersecondline">e.g. changing from Standard to Daylight Saving, if used</span></span><br>
 			<span>When transitioning from Daylight to Standard time, JavaScript assumes the change has already<br>
 			<span class="footersecondline">occurred and adds the extra hour; that is, it automatically counts the 1 o'clock hour twice</span></span><br>
-			<span>Works best in Chrome and Firefox</span><br>
+			<span>Works best in Chrome, Firefox or Internet Explorer 11+</span><br>
 			<span>Please report bugs or send suggestions to <a href="mailto:jngui@cisco.com">jngui@cisco.com</a></span><br>
 		<article>
 	</footer>
@@ -512,8 +601,13 @@ function getCurrentTimePlaceholder()
 	var timeOutDoAgain = setTimeout(getCurrentTimePlaceholder, 1000);
 }
 
-testnum = 0;
-waitTime = 100; // fadeOut, fadeIn time delay for setTimeout functions
+function userHitEnter(idClicked) {
+	if (event.keyCode == 13)
+		document.getElementById(idClicked).click();
+}
+
+// testnum = 0;
+waitTime = 120; // fadeOut, fadeIn time delay for setTimeout functions
 
 function validate()
 {
@@ -557,7 +651,7 @@ function validate()
 			// replace all multiple whitespace with a single space
 			// if there is whitespace, there must be at least one or else it should be a '-'
 			originalDate = originalDate.replace(/\s+/g, " ");
-			// maybe remove all whitespace and parse from there?
+			// maybe remove all whitespace and parse from there? might give some more flexibility in typos
 
 			// parse-breakdown
 			date = parseInt(originalDate.substr(0,2));
@@ -712,8 +806,8 @@ function convertDate()
 	newDate = newDate + "In Halifax Time: <span id=\"halifaxTime\">" + localCiscoDate + "</span><br>";
 	newDate = newDate + "<button class=\"newTimeTextBox\" id=\"copyHalifaxTime\" onClick=\"copyHalifaxTime()\">Copy";
 	newDate = newDate + "</button><br>";
-	newDate = newDate + "<span class=\"copyMessageSuccessHide\">Copied!</span>";
-	newDate = newDate + "<span class=\"copyMessageFailedHide\">Failed!</span>";
+	newDate = newDate + "<span id=\"copyMessageSuccess\" class=\"copyMessageSuccessStart\">Copied!</span>";
+	newDate = newDate + "<span id=\"copyMessageFailed\" class=\"copyMessageFailedStart\">Failed!</span>";
 
 /*
 ************************************************************************************************************************************************
@@ -841,9 +935,14 @@ function doublize(digits) {
 }
 
 function copyHalifaxTime() {
+
+	// Copied/Failed message fade out wait time
+	var fadeOutWaitTime = 1250;
+
 	// create temporary textarea, select text, copy, remove textarea
 	try
 	{
+		document.execCommand("copy");
 		var t = document.createElement('input');
 		t.setAttribute("type", "textarea");
 		t.setAttribute("id", "hiddenTextCopy");
@@ -852,10 +951,17 @@ function copyHalifaxTime() {
 		t.select();
 		document.execCommand("copy");
 		document.getElementById("hiddenTextCopy").remove();
+
+		// fadeIn, fadeOut Copied message via className
+		document.getElementById("copyMessageSuccess").className = "copyMessageSuccessShow";
+		setTimeout(function(){document.getElementById("copyMessageSuccess").className = "copyMessageSuccessHide";}, fadeOutWaitTime);
 	}
 	catch(e)
 	{
-		alert(e);
+		// alert(e);
+		// fadeIn, fadeOut Failed message via className
+		document.getElementById("copyMessageFailed").className = "copyMessageFailedShow";
+		setTimeout(function(){document.getElementById("copyMessageFailed").className = "copyMessageFailedHide";}, fadeOutWaitTime);
 	}
 
 	// call function to fade in-fade out 'copyMessage' with "Copied!"/"Oops!"
@@ -877,9 +983,407 @@ function isNumberKey(evt){
 	A-Z ASCII 65-90
 	a-z ASCII 97-122
 */
+
+var telephoneCode = { "codeCountry" : [
+	{ "code" : "995 44", "country" : "Abkhazia" },
+	{ "code" : "7 840", "country" : "Abkhazia" },
+	{ "code" : "7 940", "country" : "Abkhazia" },
+	{ "code" : "93", "country" : "Afghanistan" },
+	{ "code" : "358 18", "country" : "Aland Islands" },
+	{ "code" : "355", "country" : "Albania" },
+	{ "code" : "213", "country" : "Algeria" },
+	{ "code" : "1 684", "country" : "American Samoa" },
+	{ "code" : "376", "country" : "Andorra" },
+	{ "code" : "244", "country" : "Angola" },
+	{ "code" : "1 264", "country" : "Anguilla" },
+	{ "code" : "1 268", "country" : "Antigua and Barbuda" },
+	{ "code" : "54", "country" : "Argentina" },
+	{ "code" : "374", "country" : "Armenia" },
+	{ "code" : "297", "country" : "Aruba" },
+	{ "code" : "247", "country" : "Ascension Island" },
+	{ "code" : "61", "country" : "Australia" },
+	{ "code" : "672 1", "country" : "Australia Australian Antarctic Territory" },
+	{ "code" : "672", "country" : "Australian External Territories" },
+	{ "code" : "43", "country" : "Austria" },
+	{ "code" : "994", "country" : "Azerbaijan" },
+	{ "code" : "1 242", "country" : "Bahamas" },
+	{ "code" : "973", "country" : "Bahrain" },
+	{ "code" : "880", "country" : "Bangladesh" },
+	{ "code" : "1 246", "country" : "Barbados" },
+	{ "code" : "375", "country" : "Belarus" },
+	{ "code" : "32", "country" : "Belgium" },
+	{ "code" : "501", "country" : "Belize" },
+	{ "code" : "229", "country" : "Benin" },
+	{ "code" : "1 441", "country" : "Bermuda" },
+	{ "code" : "975", "country" : "Bhutan" },
+	{ "code" : "591", "country" : "Bolivia" },
+	{ "code" : "599 7", "country" : "Bonaire" },
+	{ "code" : "387", "country" : "Bosnia and Herzegovina" },
+	{ "code" : "267", "country" : "Botswana" },
+	{ "code" : "55", "country" : "Brazil" },
+	{ "code" : "246", "country" : "British Indian Ocean Territory" },
+	{ "code" : "1 284", "country" : "British Virgin Islands" },
+	{ "code" : "673", "country" : "Brunei" },
+	{ "code" : "359", "country" : "Bulgaria" },
+	{ "code" : "226", "country" : "Burkina Faso" },
+	{ "code" : "257", "country" : "Burundi" },
+	{ "code" : "855", "country" : "Cambodia" },
+	{ "code" : "237", "country" : "Cameroon" },
+	{ "code" : "1", "country" : "Canada" },
+	{ "code" : "238", "country" : "Cape Verde" },
+	{ "code" : "1 345", "country" : "Cayman Islands" },
+	{ "code" : "236", "country" : "Central African Republic" },
+	{ "code" : "235", "country" : "Chad" },
+	{ "code" : "56", "country" : "Chile" },
+	{ "code" : "86", "country" : "China" },
+	{ "code" : "61 8 9164", "country" : "Christmas Island" },
+	{ "code" : "61 8 9162", "country" : "Cocos Islands" },
+	{ "code" : "57", "country" : "Colombia" },
+	{ "code" : "269", "country" : "Comoros" },
+	{ "code" : "682", "country" : "Cook Islands" },
+	{ "code" : "506", "country" : "Costa Rica" },
+	{ "code" : "385", "country" : "Croatia" },
+	{ "code" : "53", "country" : "Cuba" },
+	{ "code" : "599 9", "country" : "Curacao" },
+	{ "code" : "357", "country" : "Cyprus" },
+	{ "code" : "420", "country" : "Czech Republic" },
+	{ "code" : "243", "country" : "Democratic Republic of the Congo" },
+	{ "code" : "45", "country" : "Denmark" },
+	{ "code" : "253", "country" : "Djibouti" },
+	{ "code" : "1 767", "country" : "Dominica" },
+	{ "code" : "1 809", "country" : "Dominican Republic" },
+	{ "code" : "1 829", "country" : "Dominican Republic" },
+	{ "code" : "1 849", "country" : "Dominican Republic" },
+	{ "code" : "670", "country" : "East Timor" },
+	{ "code" : "593", "country" : "Ecuador" },
+	{ "code" : "20", "country" : "Egypt" },
+	{ "code" : "503", "country" : "El Salvador" },
+	{ "code" : "240", "country" : "Equatorial Guinea" },
+	{ "code" : "291", "country" : "Eritrea" },
+	{ "code" : "372", "country" : "Estonia" },
+	{ "code" : "251", "country" : "Ethiopia" },
+	{ "code" : "500", "country" : "Falkland Islands" },
+	{ "code" : "298", "country" : "Faroe Islands" },
+	{ "code" : "691", "country" : "Federated States of Micronesia" },
+	{ "code" : "679", "country" : "Fiji" },
+	{ "code" : "358", "country" : "Finland" },
+	{ "code" : "33", "country" : "France" },
+	{ "code" : "594", "country" : "French Guiana" },
+	{ "code" : "689", "country" : "French Polynesia" },
+	{ "code" : "241", "country" : "Gabon" },
+	{ "code" : "220", "country" : "Gambia" },
+	{ "code" : "995", "country" : "Georgia" },
+	{ "code" : "49", "country" : "Germany" },
+	{ "code" : "233", "country" : "Ghana" },
+	{ "code" : "350", "country" : "Gibraltar" },
+	{ "code" : "30", "country" : "Greece" },
+	{ "code" : "299", "country" : "Greenland" },
+	{ "code" : "1 473", "country" : "Grenada" },
+	{ "code" : "590", "country" : "Guadeloupe" },
+	{ "code" : "1 671", "country" : "Guam" },
+	{ "code" : "502", "country" : "Guatemala" },
+	{ "code" : "44 1481", "country" : "Guernsey" },
+	{ "code" : "224", "country" : "Guinea" },
+	{ "code" : "245", "country" : "Guinea-Bissau" },
+	{ "code" : "592", "country" : "Guyana" },
+	{ "code" : "509", "country" : "Haiti" },
+	{ "code" : "504", "country" : "Honduras" },
+	{ "code" : "852", "country" : "Hong Kong" },
+	{ "code" : "36", "country" : "Hungary" },
+	{ "code" : "354", "country" : "Iceland" },
+	{ "code" : "91", "country" : "India" },
+	{ "code" : "62", "country" : "Indonesia" },
+	{ "code" : "98", "country" : "Iran" },
+	{ "code" : "964", "country" : "Iraq" },
+	{ "code" : "353", "country" : "Ireland" },
+	{ "code" : "44 1624", "country" : "Isle of Man" },
+	{ "code" : "972", "country" : "Israel" },
+	{ "code" : "39", "country" : "Italy" },
+	{ "code" : "225", "country" : "Ivory Coast" },
+	{ "code" : "1 876", "country" : "Jamaica" },
+	{ "code" : "47 79", "country" : "Jan Mayen" },
+	{ "code" : "81", "country" : "Japan" },
+	{ "code" : "44 1534", "country" : "Jersey" },
+	{ "code" : "962", "country" : "Jordan" },
+	{ "code" : "7 6", "country" : "Kazakhstan" },
+	{ "code" : "7 7", "country" : "Kazakhstan" },
+	{ "code" : "254", "country" : "Kenya" },
+	{ "code" : "686", "country" : "Kiribati" },
+	{ "code" : "383", "country" : "Kosovo" },
+	{ "code" : "965", "country" : "Kuwait" },
+	{ "code" : "996", "country" : "Kyrgyzstan" },
+	{ "code" : "856", "country" : "Laos" },
+	{ "code" : "371", "country" : "Latvia" },
+	{ "code" : "961", "country" : "Lebanon" },
+	{ "code" : "266", "country" : "Lesotho" },
+	{ "code" : "231", "country" : "Liberia" },
+	{ "code" : "218", "country" : "Libya" },
+	{ "code" : "423", "country" : "Liechtenstein" },
+	{ "code" : "370", "country" : "Lithuania" },
+	{ "code" : "352", "country" : "Luxembourg" },
+	{ "code" : "853", "country" : "Macau" },
+	{ "code" : "389", "country" : "Macedonia" },
+	{ "code" : "261", "country" : "Madagascar" },
+	{ "code" : "265", "country" : "Malawi" },
+	{ "code" : "60", "country" : "Malaysia" },
+	{ "code" : "960", "country" : "Maldives" },
+	{ "code" : "223", "country" : "Mali" },
+	{ "code" : "356", "country" : "Malta" },
+	{ "code" : "692", "country" : "Marshall Islands" },
+	{ "code" : "596", "country" : "Martinique" },
+	{ "code" : "222", "country" : "Mauritania" },
+	{ "code" : "230", "country" : "Mauritius" },
+	{ "code" : "262", "country" : "Mayotte" },
+	{ "code" : "52", "country" : "Mexico" },
+	{ "code" : "373", "country" : "Moldova" },
+	{ "code" : "377", "country" : "Monaco" },
+	{ "code" : "976", "country" : "Mongolia" },
+	{ "code" : "382", "country" : "Montenegro" },
+	{ "code" : "1 664", "country" : "Montserrat" },
+	{ "code" : "212", "country" : "Morocco" },
+	{ "code" : "258", "country" : "Mozambique" },
+	{ "code" : "95", "country" : "Myanmar" },
+	{ "code" : "374", "country" : "Nagorno-Karabakh" },
+	{ "code" : "264", "country" : "Namibia" },
+	{ "code" : "674", "country" : "Nauru" },
+	{ "code" : "977", "country" : "Nepal" },
+	{ "code" : "31", "country" : "Netherlands" },
+	{ "code" : "687", "country" : "New Caledonia" },
+	{ "code" : "64", "country" : "New Zealand" },
+	{ "code" : "505", "country" : "Nicaragua" },
+	{ "code" : "227", "country" : "Niger" },
+	{ "code" : "234", "country" : "Nigeria" },
+	{ "code" : "683", "country" : "Niue" },
+	{ "code" : "672 3", "country" : "Norfolk Island" },
+	{ "code" : "850", "country" : "North Korea" },
+	{ "code" : "90 392", "country" : "Northern Cyprus" },
+	{ "code" : "44 28", "country" : "Northern Ireland" },
+	{ "code" : "1 670", "country" : "Northern Mariana Islands" },
+	{ "code" : "47", "country" : "Norway" },
+	{ "code" : "968", "country" : "Oman" },
+	{ "code" : "92", "country" : "Pakistan" },
+	{ "code" : "680", "country" : "Palau" },
+	{ "code" : "970", "country" : "Palestine" },
+	{ "code" : "507", "country" : "Panama" },
+	{ "code" : "675", "country" : "Papua New Guinea" },
+	{ "code" : "595", "country" : "Paraguay" },
+	{ "code" : "51", "country" : "Peru" },
+	{ "code" : "63", "country" : "Philippines" },
+	{ "code" : "64", "country" : "Pitcairn Islands" },
+	{ "code" : "48", "country" : "Poland" },
+	{ "code" : "351", "country" : "Portugal" },
+	{ "code" : "1 787", "country" : "Puerto Rico" },
+	{ "code" : "1 939", "country" : "Puerto Rico" },
+	{ "code" : "974", "country" : "Qatar" },
+	{ "code" : "242", "country" : "Republic of the Congo" },
+	{ "code" : "262", "country" : "Reunion" },
+	{ "code" : "40", "country" : "Romania" },
+	{ "code" : "7", "country" : "Russia" },
+	{ "code" : "250", "country" : "Rwanda" },
+	{ "code" : "599 4", "country" : "Saba" },
+	{ "code" : "590", "country" : "Saint Barthelemy" },
+	{ "code" : "290", "country" : "Saint Helena" },
+	{ "code" : "1 869", "country" : "Saint Kitts and Nevis" },
+	{ "code" : "1 758", "country" : "Saint Lucia" },
+	{ "code" : "590", "country" : "Saint Martin" },
+	{ "code" : "1 784", "country" : "Saint Vincent and the Grenadines" },
+	{ "code" : "508", "country" : "Saint-Pierre and Miquelon" },
+	{ "code" : "685", "country" : "Samoa" },
+	{ "code" : "378", "country" : "San Marino" },
+	{ "code" : "239", "country" : "Sao Tome and Principe" },
+	{ "code" : "966", "country" : "Saudi Arabia" },
+	{ "code" : "221", "country" : "Senegal" },
+	{ "code" : "381", "country" : "Serbia" },
+	{ "code" : "248", "country" : "Seychelles" },
+	{ "code" : "232", "country" : "Sierra Leone" },
+	{ "code" : "65", "country" : "Singapore" },
+	{ "code" : "599 3", "country" : "Sint Eustatius" },
+	{ "code" : "1 721", "country" : "Sint Maarten" },
+	{ "code" : "421", "country" : "Slovakia" },
+	{ "code" : "386", "country" : "Slovenia" },
+	{ "code" : "677", "country" : "Solomon Islands" },
+	{ "code" : "252", "country" : "Somalia" },
+	{ "code" : "27", "country" : "South Africa" },
+	{ "code" : "500", "country" : "South Georgia and the South Sandwich Islands" },
+	{ "code" : "82", "country" : "South Korea" },
+	{ "code" : "995 34", "country" : "South Ossetia" },
+	{ "code" : "211", "country" : "South Sudan" },
+	{ "code" : "34", "country" : "Spain" },
+	{ "code" : "94", "country" : "Sri Lanka" },
+	{ "code" : "249", "country" : "Sudan" },
+	{ "code" : "597", "country" : "Suriname" },
+	{ "code" : "47 79", "country" : "Svalbard" },
+	{ "code" : "268", "country" : "Swaziland" },
+	{ "code" : "46", "country" : "Sweden" },
+	{ "code" : "41", "country" : "Switzerland" },
+	{ "code" : "963", "country" : "Syria" },
+	{ "code" : "886", "country" : "Taiwan" },
+	{ "code" : "992", "country" : "Tajikistan" },
+	{ "code" : "255", "country" : "Tanzania" },
+	{ "code" : "66", "country" : "Thailand" },
+	{ "code" : "228", "country" : "Togo" },
+	{ "code" : "690", "country" : "Tokelau" },
+	{ "code" : "676", "country" : "Tonga" },
+	{ "code" : "373 2", "country" : "Transnistria" },
+	{ "code" : "373 5", "country" : "Transnistria" },
+	{ "code" : "1 868", "country" : "Trinidad and Tobago" },
+	{ "code" : "290 8", "country" : "Tristan da Cunha" },
+	{ "code" : "216", "country" : "Tunisia" },
+	{ "code" : "90", "country" : "Turkey" },
+	{ "code" : "993", "country" : "Turkmenistan" },
+	{ "code" : "1 649", "country" : "Turks and Caicos Islands" },
+	{ "code" : "688", "country" : "Tuvalu" },
+	{ "code" : "256", "country" : "Uganda" },
+	{ "code" : "380", "country" : "Ukraine" },
+	{ "code" : "971", "country" : "United Arab Emirates" },
+	{ "code" : "44", "country" : "United Kingdom" },
+	{ "code" : "1", "country" : "United States" },
+	{ "code" : "1 340", "country" : "United States Virgin Islands" },
+	{ "code" : "598", "country" : "Uruguay" },
+	{ "code" : "998", "country" : "Uzbekistan" },
+	{ "code" : "678", "country" : "Vanuatu" },
+	{ "code" : "39 06 698", "country" : "Vatican City" },
+	{ "code" : "379", "country" : "Vatican City" },
+	{ "code" : "58", "country" : "Venezuela" },
+	{ "code" : "84", "country" : "Vietnam" },
+	{ "code" : "681", "country" : "Wallis and Futuna" },
+	{ "code" : "967", "country" : "Yemen" },
+	{ "code" : "260", "country" : "Zambia" },
+	{ "code" : "255 24", "country" : "Zanzibar" },
+	{ "code" : "263", "country" : "Zimbabwe" }
+ ]
+};
+
+function initiateCountryDropdown() {
+	var select = document.getElementById("countryDropdown");
+    var option;
+
+    option = document.createElement('option');
+	option.appendChild(document.createTextNode("Please select a country"));
+	select.appendChild(option);
+
+    // run through telephoneCode JSON array to create OPTION elements for select dropdown
+	for (i = 0; i < telephoneCode.codeCountry.length; i++) {
+		// if the 'country' is the same as the previous entry, go to the next item in the array - eliminates duplicate country entries in the dropdown list
+		if (i > 0 && telephoneCode.codeCountry[i].country == telephoneCode.codeCountry[i-1].country)
+		{
+			continue;
+		}
+		else // create the OPTION element
+		{
+		    option = document.createElement('option');
+		    //option.setAttribute('value', telephoneCode.codeCountry[i].country); // we don't really need to set the 'value' attribute for the OPTION element...
+		    option.appendChild(document.createTextNode(telephoneCode.codeCountry[i].country));
+		    select.appendChild(option);
+		}
+	}
+}
+
+function getTelephoneCountryCode(userCountry) {
+
+	var codeAnswer = "+";
+
+	// fade out what is currently showing
+	document.getElementById("giveTelCodeAnswer").className = "giveTelCodeAnswerFadeOut";
+
+	if (document.getElementById("countryDropdown").value != "Please select a country")
+	{
+		for (i = 0; i < telephoneCode.codeCountry.length; i++)
+		{
+			if (telephoneCode.codeCountry[i].country == userCountry && codeAnswer != "+")
+			{
+				codeAnswer = codeAnswer + ", +" + telephoneCode.codeCountry[i].code;
+			}
+			else if (telephoneCode.codeCountry[i].country == userCountry && codeAnswer == "+")
+			{
+				codeAnswer = codeAnswer + telephoneCode.codeCountry[i].code;
+			}
+		}
+
+		//document.getElementById("giveTelCodeAnswer").innerHTML = codeAnswer;
+		setTimeout(function(){document.getElementById("giveTelCodeAnswer").className = "giveTelCodeAnswerFadeIn";}, 100);
+		setTimeout(function(){document.getElementById("giveTelCodeAnswer").innerHTML = codeAnswer;}, 100);
+	}
+	else
+	{
+		setTimeout(function(){document.getElementById("giveTelCodeAnswer").className = "giveTelCodeAnswerFadeIn";}, 100);
+		setTimeout(function(){document.getElementById("giveTelCodeAnswer").innerHTML = "";}, 100);
+	}
+}
+
+function getCountryGivenCode() {
+	// compare entered text with JSON array "code", removing whitespace along the way, via regex?
+	// keep adding countries to the list
+	// innerHTML = country list
+
+	// get number entered by user
+	var userCountryCode = document.getElementById("userTelCountryCode").value;
+	var countryArray = [];
+	var listTelCode = "";
+
+	// fade out what is currently showing
+	document.getElementById("giveCountryAnswer").className = "giveCountryAnswerFadeOut";
+
+	// cycle through the array, comparing, gathering country names
+	// if user-entered telCode matches the whole entry, with removed whitespace => match
+	// else not a match
+	// ex. if user enters "1", it should match only Canada and USA, not any of the territories
+		// that will have to be searched for specifically, i.e. "1242" for Bahamas
+	
+	// might not even need to use an array. Just build text answer line.
+
+	for (i = 0; i < telephoneCode.codeCountry.length; i++)
+	{
+		// remove all whitespace
+		listTelCode = telephoneCode.codeCountry[i].code.replace(/\s*/g, "");
+
+		if (listTelCode == userCountryCode)
+		{
+			countryArray.push(telephoneCode.codeCountry[i].country);
+		}
+		else
+		{
+			// no "else"? what else is there to do? think!
+		}
+	}
+
+	var countryListText = "";
+
+	if (countryArray.length > 0)
+	{
+		for (i = 0; i < countryArray.length; i++)
+		{
+			if (i > 0)
+				countryListText = countryListText + ", ";
+
+			countryListText = countryListText + countryArray[i];
+		}
+	}
+	else
+	{
+		countryListText = "Unassigned";
+	}
+
+	//document.getElementById("giveCountryAnswer").innerHTML = countryListText;
+	setTimeout(function(){document.getElementById("giveCountryAnswer").className = "giveCountryAnswerFadeIn";}, 123);
+	setTimeout(function(){document.getElementById("giveCountryAnswer").innerHTML = countryListText;}, 123);
+}
 </script>
 
 </body>
 </html>
-<!-- (c)2016 Written by Jonathan Ngui (jngui) -->
-<!-- with consultation by Brandon Porter (braporte) -->
+
+<!--
+Animation
+	animation-name
+	animation-duration			[seconds or milliseconds]
+	animation-timing-function	linear|ease|ease-in|ease-out|ease-in-out|step-start|step-end|steps(int,start|end)|cubic-bezier(n,n,n,n)
+	animation-delay				[seconds or milliseconds]
+	animation-iteration-count	number|infinite
+	animation-direction			normal|reverse|alternate|alternate-reverse
+	animation-fill-mode			none|forwards|backwards|both
+	animation-play-state		paused|running
+-->
+
+<!-- (c)2016 Written by Jonathan Ngui (jngui) aka J-Thugga -->
+<!-- with consultation by Brandon Porter (braporte) aka B-Thug -->
